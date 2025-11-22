@@ -1,3 +1,7 @@
+pub mod usb;
+
+use usb::UsbDevice;
+
 /// List of supported device IDs (only one for now, as im testing it on my sensor.
 /// They have the format: (vendor, product)
 pub const SUPPORTED: &[(u16, u16)] = &[(0x138a, 0x0097)];
@@ -15,6 +19,30 @@ pub enum DriverError {
 
     #[error("The USB device was found but is not supported")]
     GetDeviceFoundUnsupported,
+
+    #[error("Could not call open() on the USB device")]
+    OpenDevice(#[source] rusb::Error),
+
+    #[error("Error writing data to the USB device")]
+    UsbWrite(#[source] rusb::Error),
+
+    #[error("The data was not written to the USB device completely")]
+    UsbWritePartial,
+
+    #[error("Could not read response from USB device")]
+    UsbReadResponse(#[source] rusb::Error),
+
+    #[error("Could not reset USB device")]
+    UsbReset(#[source] rusb::Error),
+
+    #[error("Device returned an invalid response")]
+    UsbInitInvalid,
+
+    #[error("Failed, code: {0:04x}")]
+    UsbInitFailed(u16),
+
+    #[error("Signature validation failed, code: {0:04x}")]
+    UsbInitSignatureFailed(u16),
 }
 
 /// List the supported USB devices, see also: [`SUPPORTED`]
@@ -61,14 +89,4 @@ pub fn get_device(busnum: u8, addr: u8) -> Result<UsbDevice, DriverError> {
     }
 
     Err(DriverError::GetDeviceNotFound)
-}
-
-/// A wrapper around the given device, see [`Self::open`]
-pub struct UsbDevice(pub rusb::Device<rusb::GlobalContext>);
-
-impl UsbDevice {
-    /// Open this device
-    pub fn open(&self) -> u8 {
-        todo!()
-    }
 }
