@@ -1,0 +1,8 @@
+[package]
+name = "driver"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+rusb = { version = "0.9.4", default-features = false }
+thiserror = "2.0.16"
